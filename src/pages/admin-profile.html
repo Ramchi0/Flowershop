@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Profile | Dahlia &amp; Stem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/dahlia.css">
+  </head>
+  <body class="dash">
+    <aside class="dash-side">
+      <a class="brand" href="index.html"><span class="brand-mark">✦</span>Dahlia &amp; Stem</a>
+      <p class="dash-label">Studio</p>
+      <ul class="dash-menu">
+        <li><a href="admin-dashboard.html"><b>⌑</b><span>Overview</span></a></li>
+        <li><a href="admin-dashboard.html#products"><b>⌘</b><span>Products</span></a></li>
+        <li><a href="admin-dashboard.html#categories"><b>◈</b><span>Collections</span></a></li>
+        <li><a href="admin-dashboard.html#orders"><b>↗</b><span>Orders</span></a></li>
+        <li><a class="active" href="admin-profile.html"><b>♙</b><span>My profile</span></a></li>
+      </ul>
+      <p class="dash-label">Manage</p>
+      <ul class="dash-menu">
+        <li><a href="admin-dashboard.html" data-admin-logout><b>↪</b><span>Log out</span></a></li>
+      </ul>
+      <div class="side-upgrade">
+        <strong>Need a hand?</strong>
+        <p>Preview the public customer storefront.</p>
+        <a href="storefront">View storefront →</a>
+      </div>
+    </aside>
+    <main class="dash-main">
+      <header class="dash-top">
+        <a class="dash-mobile-brand" href="index.html">Dahlia &amp; Stem</a>
+        <span class="dash-page-label">Studio account</span>
+        <div class="dash-user">
+          <a class="avatar admin-profile-link" href="admin-profile.html" data-admin-initials aria-label="Admin profile">RM</a>
+          <a class="admin-profile-link" href="admin-profile.html" style="color:inherit"><strong data-admin-name>Riya Mehta</strong><br><small data-admin-role style="color:var(--muted)">Studio owner</small></a>
+        </div>
+      </header>
+      <div class="dash-content">
+        <div class="dash-heading">
+          <div>
+            <span class="eyebrow">Your studio account</span>
+            <h1>Admin profile</h1>
+            <p>Manage the name and contact details used for your studio account.</p>
+          </div>
+          <a class="btn btn-outline" href="admin-dashboard.html">← Back to overview</a>
+        </div>
+        <form class="profile-form" data-demo-form data-admin-profile-form>
+          <section class="panel profile-section">
+            <div class="panel-title">
+              <div>
+                <h2>Personal details</h2>
+                <p class="profile-section-copy">Update the details shown in your studio dashboard.</p>
+              </div>
+              <span class="profile-avatar admin-profile-avatar" data-admin-initials>RM</span>
+            </div>
+            <div class="profile-fields">
+              <label class="field">FULL NAME<input name="fullName" type="text" autocomplete="name" required maxlength="80" value="Riya Mehta"></label>
+              <label class="field">WORK EMAIL<input name="email" type="email" autocomplete="email" required maxlength="254" value="studio@dahliaandstem.com"></label>
+              <label class="field profile-field-wide">ROLE<input name="role" type="text" required maxlength="60" value="Studio owner"></label>
+            </div>
+          </section>
+          <div class="profile-actions">
+            <a class="btn btn-outline" href="admin-dashboard.html">Cancel</a>
+            <button class="btn btn-primary" type="submit">Save profile</button>
+          </div>
+          <p class="profile-save-note">Profile details are saved in this browser. Account syncing requires a connected backend.</p>
+        </form>
+        <section class="panel profile-logout">
+          <div>
+            <h2>Sign out</h2>
+            <p class="profile-section-copy">Finish your studio session on this device.</p>
+          </div>
+          <button class="btn btn-outline" type="button" data-admin-logout>Log out</button>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

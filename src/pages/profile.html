@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Profile | Dahlia &amp; Stem</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/dahlia.css">
+  </head>
+  <body class="dash">
+    <aside class="dash-side">
+      <a class="brand" href="index.html"><span class="brand-mark">✦</span>Dahlia &amp; Stem</a>
+      <p class="dash-label">My studio</p>
+      <ul class="dash-menu">
+        <li><a href="customer-dashboard.html"><b>⌑</b><span>Overview</span></a></li>
+        <li><a class="active" href="profile.html"><b>♙</b><span>My profile</span></a></li>
+        <li><a href="customer-dashboard.html#saved"><b>♡</b><span>Saved pieces</span></a></li>
+        <li><a href="customer-dashboard.html#orders"><b>↗</b><span>My orders</span></a></li>
+        <li><a href="customer-dashboard.html#custom"><b>✦</b><span>Custom requests</span></a></li>
+      </ul>
+      <p class="dash-label">Need help?</p>
+      <ul class="dash-menu">
+        <li><a href="contact.html"><b>✉</b><span>Contact the studio</span></a></li>
+      </ul>
+      <div class="side-upgrade">
+        <strong>Looking for inspiration?</strong>
+        <p>New pieces arrive in small, thoughtful edits.</p>
+        <a href="shop.html">Explore the shop →</a>
+      </div>
+    </aside>
+    <main class="dash-main">
+      <header class="dash-top">
+        <a class="dash-mobile-brand" href="index.html">Dahlia &amp; Stem</a>
+        <span class="dash-page-label">Your account</span>
+        <div class="dash-user">
+          <a class="avatar customer-profile-link" href="profile.html" data-customer-initials style="background:#d08f78" aria-label="Your profile">TS</a>
+          <a class="customer-profile-link" href="profile.html" style="color:inherit"><strong data-customer-name>Tanvi Shah</strong><br><small style="color:var(--muted)">Customer profile</small></a>
+        </div>
+      </header>
+      <div class="dash-content">
+        <div class="dash-heading">
+          <div>
+            <span class="eyebrow">Your personal flower room</span>
+            <h1>My profile</h1>
+            <p>Keep your contact and delivery details up to date for your next order.</p>
+          </div>
+          <a class="btn btn-outline" href="customer-dashboard.html">← Back to my studio</a>
+        </div>
+        <form class="profile-form" data-demo-form data-customer-profile-form>
+          <section class="panel profile-section">
+            <div class="panel-title">
+              <div>
+                <h2>Personal details</h2>
+                <p class="profile-section-copy">These details help us keep your orders and studio notes connected to you.</p>
+              </div>
+              <span class="profile-avatar" data-customer-initials>TS</span>
+            </div>
+            <div class="profile-fields">
+              <label class="field">FULL NAME<input name="fullName" type="text" autocomplete="name" required maxlength="80" value="Tanvi Shah"></label>
+              <label class="field">EMAIL ADDRESS<input name="email" type="email" autocomplete="email" required maxlength="254" value="tanvi@example.com"></label>
+              <label class="field">PHONE NUMBER <span class="optional-label">OPTIONAL</span><input name="phone" type="tel" autocomplete="tel" maxlength="30" placeholder="Add a contact number"></label>
+            </div>
+          </section>
+          <section class="panel profile-section">
+            <div class="panel-title">
+              <div>
+                <h2>Default delivery address</h2>
+                <p class="profile-section-copy">Save an address to make checkout quicker. You can leave this blank until you need it.</p>
+              </div>
+            </div>
+            <div class="profile-fields">
+              <label class="field profile-field-wide">ADDRESS<input name="address" type="text" autocomplete="street-address" maxlength="180" placeholder="House number, street and area"></label>
+              <label class="field">CITY<input name="city" type="text" autocomplete="address-level2" maxlength="80" placeholder="Your city"></label>
+              <label class="field">POSTAL CODE<input name="postalCode" type="text" autocomplete="postal-code" maxlength="16" placeholder="Postal code"></label>
+            </div>
+          </section>
+          <section class="panel profile-section preferences-section">
+            <div>
+              <h2>Studio updates</h2>
+              <p class="profile-section-copy">Choose whether to receive order and delivery updates in this preview.</p>
+            </div>
+            <label class="settings-toggle profile-toggle">
+              <input name="orderUpdates" type="checkbox" checked>
+              <span><strong>Order and delivery updates</strong><small>Keep me informed about the progress of my orders.</small></span>
+            </label>
+          </section>
+          <div class="profile-actions">
+            <a class="btn btn-outline" href="customer-dashboard.html">Back to my studio</a>
+            <button class="btn btn-primary" type="submit">Save my profile</button>
+          </div>
+          <p class="profile-save-note">Profile details are saved in this browser. Account syncing requires a connected backend.</p>
+        </form>
+        <section class="panel profile-logout">
+          <div>
+            <h2>Sign out</h2>
+            <p class="profile-section-copy">Finish your customer session on this device.</p>
+          </div>
+          <button class="btn btn-outline" type="button" data-customer-logout>Log out</button>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
