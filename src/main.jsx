@@ -601,6 +601,10 @@ function getCurrentPage() {
   }
 
   let pageName = currentUrl.pathname.split('/').filter(Boolean).pop() ?? 'index';
+  if (pageName === 'index') {
+    pageName = 'login';
+    window.sessionStorage.removeItem(storefrontPreviewKey);
+  }
   let isPublicStorefront = pageName === 'storefront';
   if (pageName === 'admin-dashboard' || pageName === 'admin-login') {
     window.sessionStorage.removeItem(storefrontPreviewKey);
@@ -641,7 +645,7 @@ function getCurrentPage() {
     if (match) {
       link.setAttribute(
         'href',
-        `${match[1] === 'index' ? '' : `/${match[1]}`}${match[2] ?? ''}` || '/',
+        `${match[1] === 'index' ? '/storefront' : `/${match[1]}`}${match[2] ?? ''}`,
       );
     }
   });
@@ -652,7 +656,7 @@ function getCurrentPage() {
     if (match) {
       form.setAttribute(
         'data-redirect',
-        `${match[1] === 'index' ? '' : `/${match[1]}`}${match[2] ?? ''}` || '/',
+        `${match[1] === 'index' ? '/storefront' : `/${match[1]}`}${match[2] ?? ''}`,
       );
     }
   });
