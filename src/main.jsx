@@ -309,6 +309,39 @@ function renderStorefrontProducts(root, products) {
     card.append(info);
     productGrid.append(card);
   });
+
+  const shopLayout = root.querySelector('.shop-layout');
+  if (!shopLayout) return;
+
+  const collectionName = new URL(window.location.href).searchParams.get('collection')?.trim();
+  const normalizedCollection = collectionName?.toLocaleLowerCase();
+  const collectionAliases = {
+    'everlasting bouquets': ['arrangement'],
+    'faux plants': ['faux plant'],
+    'custom florals': ['floral art'],
+  };
+  const matchingTypes = normalizedCollection
+    ? [normalizedCollection, ...(collectionAliases[normalizedCollection] ?? [])]
+    : [];
+  const cards = [...productGrid.querySelectorAll('.product-card')];
+  let visibleCount = 0;
+  cards.forEach((card) => {
+    const productType = card.querySelector('.product-type')?.textContent.trim().toLocaleLowerCase();
+    const isVisible =
+      !normalizedCollection ||
+      matchingTypes.some((type) => productType === type);
+    card.hidden = !isVisible;
+    if (isVisible) visibleCount += 1;
+  });
+
+  const shopTitle = root.querySelector('.shop-title');
+  if (shopTitle && collectionName) shopTitle.textContent = collectionName;
+  const resultCount = shopLayout.querySelector('[data-shop-count]');
+  if (resultCount) {
+    resultCount.textContent = collectionName
+      ? `Showing ${visibleCount} pieces in ${collectionName}`
+      : `Showing ${visibleCount} lasting pieces`;
+  }
 }
 
 function renderStorefrontCollections(root, collections) {
@@ -326,7 +359,7 @@ function renderStorefrontCollections(root, collections) {
 
     const card = makeElement('a', 'category-card');
     card.dataset.adminCreatedCollection = 'true';
-    card.href = '/shop';
+    card.href = `/customer-catalog?collection=${encodeURIComponent(collection.name)}`;
     card.style.backgroundImage = `linear-gradient(0deg, rgba(16,37,27,.66), transparent 64%), url("${collection.image || getProductImage(collection.name, index)}")`;
 
     const content = makeElement('div');
@@ -342,8 +375,33 @@ function renderStorefrontCollections(root, collections) {
   });
 }
 
+function renderCustomerCatalogCollections(root, collections) {
+  const collectionList = root.querySelector('.shop-sidebar .filter-block');
+  if (!collectionList) return;
+
+  collectionList
+    .querySelectorAll('[data-admin-created-collection-link]')
+    .forEach((link) => link.remove());
+
+  collections.forEach((collection) => {
+    if (typeof collection?.name !== 'string') {
+      throw new Error('A saved collection is missing its name.');
+    }
+
+    const link = makeElement('a', 'check', collection.name);
+    link.dataset.adminCreatedCollectionLink = 'true';
+    link.href = `/customer-catalog?collection=${encodeURIComponent(collection.name)}`;
+    collectionList.append(link);
+  });
+}
+
 function renderAdminProducts(root, products) {
   const tableBody = root.querySelector('#products tbody');
+  const viewAllProductsLink = root.querySelector('#products .panel-title a');
+  if (viewAllProductsLink) {
+    viewAllProductsLink.href = '/admin-products';
+    viewAllProductsLink.removeAttribute('data-demo-message');
+  }
   if (!tableBody) return;
 
   tableBody.querySelectorAll('[data-admin-created-product]').forEach((row) => row.remove());
@@ -389,32 +447,61 @@ function renderAdminProducts(root, products) {
 
 function renderAdminCollections(root, collections) {
   const list = root.querySelector('#categories .cat-list');
-  if (!list) return;
+  const grid = root.querySelector('[data-admin-collection-grid]');
 
-  list.querySelectorAll('[data-admin-created-collection]').forEach((item) => {
-    item.remove();
+  list?.querySelectorAll('[data-admin-created-collection]').forEach((item) => item.remove());
+  grid?.querySelectorAll('[data-admin-created-collection]').forEach((item) => item.remove());
+  list?.querySelectorAll('.category-tile:not(.add-tile)').forEach((item) => {
+    if (item instanceof HTMLAnchorElement) return;
+
+    const collectionName = item.querySelector('strong')?.textContent.trim();
+    if (!collectionName) return;
+
+    const collectionTile = makeElement('a', 'category-tile admin-collection-tile');
+    collectionTile.href = `/admin-collection?collection=${encodeURIComponent(collectionName)}`;
+    collectionTile.append(...item.childNodes);
+    item.replaceWith(collectionTile);
   });
-  const addButton = list.querySelector('[data-modal-open="addCategory"]');
+  const addButton = list?.querySelector('[data-modal-open="addCategory"]');
 
   collections.forEach((collection) => {
+    if (!list && !grid) return;
     if (typeof collection?.name !== 'string') {
       throw new Error('A saved collection is missing its name.');
     }
 
-    const tile = makeElement('article', 'category-tile');
+    const tile = grid
+      ? makeElement('a', 'panel admin-collection-card')
+      : makeElement('a', 'category-tile admin-collection-tile');
     tile.dataset.adminCreatedCollection = 'true';
-    if (collection.image) {
+    const collectionHref = `/admin-collection?collection=${encodeURIComponent(collection.name)}`;
+    tile.href = collectionHref;
+    if (grid) {
       const image = makeElement('img');
-      image.src = collection.image;
+      image.src = collection.image || getProductImage(collection.name, 0);
       image.alt = '';
-      image.width = 36;
-      image.height = 36;
-      image.style.cssText = 'width:36px;height:36px;object-fit:cover;border-radius:8px';
-      tile.append(image);
+      const details = makeElement('div');
+      details.append(
+        makeElement('span', 'eyebrow', 'Collection'),
+        makeElement('h2', '', collection.name),
+        makeElement('p', '', 'View collection products'),
+      );
+      tile.append(image, details, makeElement('span', 'category-link', '→'));
+    } else {
+      if (collection.image) {
+        const image = makeElement('img');
+        image.src = collection.image;
+        image.alt = '';
+        image.width = 36;
+        image.height = 36;
+        image.style.cssText = 'width:36px;height:36px;object-fit:cover;border-radius:8px';
+        tile.append(image);
+      }
+      tile.append(makeElement('strong', '', collection.name), makeElement('span', '', 'New collection'));
     }
-    tile.append(makeElement('strong', '', collection.name), makeElement('span', '', 'New collection'));
-    if (addButton) list.insertBefore(tile, addButton);
-    else list.append(tile);
+    if (grid) grid.append(tile);
+    else if (addButton) list.insertBefore(tile, addButton);
+    else list?.append(tile);
   });
 
   const productCollection = root.querySelector('#addProduct select[name="collection"]');
@@ -430,6 +517,101 @@ function renderAdminCollections(root, collections) {
         productCollection.append(option);
       }
     });
+  }
+}
+
+function renderAdminProductCatalog(root, savedProducts) {
+  const catalog = root.querySelector('[data-admin-products]');
+  if (!catalog) return;
+
+  const sampleProducts = [
+    { name: 'Blush Peony Moment', collection: 'Everlasting bouquets', price: 2950, stock: 18, image: '/images/product-peony-bouquet.png' },
+    { name: 'Rosewood Posy', collection: 'Everlasting bouquets', price: 2250, stock: 12, image: '/images/product-peony-bouquet.png' },
+    { name: 'Quiet Morning Vase', collection: 'Everlasting bouquets', price: 3150, stock: 8, image: '/images/product-peony-bouquet.png' },
+    { name: 'The Olive Corner', collection: 'Faux plants', price: 4800, stock: 2, image: '/images/product-faux-olive.png' },
+    { name: 'Little Fern Pair', collection: 'Faux plants', price: 1850, stock: 0, image: '/images/product-faux-olive.png' },
+    { name: 'Olive Tabletop', collection: 'Faux plants', price: 2600, stock: 7, image: '/images/product-faux-olive.png' },
+    { name: 'Garden Table Study', collection: 'Custom florals', price: 3650, stock: 12, image: '/images/atelier-hero.png' },
+    { name: 'Studio Garden', collection: 'Custom florals', price: 3950, stock: 5, image: '/images/atelier-hero.png' },
+  ];
+  const requestedCollection = new URL(window.location.href).searchParams.get('collection')?.trim();
+  const allProducts = [...sampleProducts, ...savedProducts];
+  const products = requestedCollection
+    ? allProducts.filter(
+        (product) =>
+          typeof product?.collection === 'string' &&
+          product.collection.toLocaleLowerCase() === requestedCollection.toLocaleLowerCase(),
+      )
+    : allProducts;
+  const heading = root.querySelector('[data-admin-products-heading]');
+  if (heading) {
+    heading.textContent = requestedCollection
+      ? `${requestedCollection} products`
+      : 'Product catalogue';
+  }
+  const collectionSelect = root.querySelector('#addProduct select[name="collection"]');
+  if (requestedCollection && collectionSelect) {
+    const matchingOption = [...collectionSelect.options].find(
+      (option) => option.value.toLocaleLowerCase() === requestedCollection.toLocaleLowerCase(),
+    );
+    if (matchingOption) collectionSelect.value = matchingOption.value;
+  }
+  catalog.replaceChildren();
+
+  const groupedProducts = new Map();
+  products.forEach((product, index) => {
+    if (
+      typeof product?.name !== 'string' ||
+      typeof product.collection !== 'string' ||
+      typeof product.price !== 'number' ||
+      !Number.isFinite(product.price)
+    ) {
+      throw new Error('A saved product is missing required product details.');
+    }
+    const group = groupedProducts.get(product.collection) ?? [];
+    group.push({ ...product, index });
+    groupedProducts.set(product.collection, group);
+  });
+
+  groupedProducts.forEach((collectionProducts, collectionName) => {
+    const section = makeElement('section', 'admin-product-group');
+    const title = makeElement('div', 'panel-title');
+    title.append(
+      makeElement('h2', '', collectionName),
+      makeElement(
+        'span',
+        'pill',
+        `${collectionProducts.length} ${collectionProducts.length === 1 ? 'product' : 'products'}`,
+      ),
+    );
+    const cards = makeElement('div', 'admin-product-grid');
+
+    collectionProducts.forEach((product) => {
+      const card = makeElement('article', 'admin-product-card');
+      const image = makeElement('img');
+      image.src = product.image || getProductImage(collectionName, product.index);
+      image.alt = product.name;
+      const details = makeElement('div', 'admin-product-card-details');
+      details.append(
+        makeElement('h3', '', product.name),
+        makeElement('span', 'product-price', `₹${product.price.toLocaleString('en-IN')}`),
+        makeElement(
+          'span',
+          product.stock > 0 ? 'stock' : 'stock low',
+          `${product.stock ?? 0} in stock`,
+        ),
+      );
+      if (product.description) details.append(makeElement('p', '', product.description));
+      card.append(image, details);
+      cards.append(card);
+    });
+
+    section.append(title, cards);
+    catalog.append(section);
+  });
+
+  if (products.length === 0) {
+    catalog.append(makeElement('p', 'admin-catalog-empty', 'No products in this collection yet.'));
   }
 }
 
@@ -461,18 +643,15 @@ function preparePublicStorefront(root, settings) {
     );
   });
 
-  root.querySelectorAll('.nav-links a').forEach((link) => {
-    if (/my studio|my account/i.test(link.textContent)) link.remove();
-  });
-  root.querySelectorAll('.nav-actions a[href="/customer-dashboard"]').forEach((link) => {
-    link.remove();
+  root.querySelectorAll('.nav-links a[href="/customer-dashboard"]').forEach((link) => {
+    link.textContent = 'Dashboard';
   });
   root.querySelectorAll('.cart-badge, .hero-details').forEach((element) => {
     element.remove();
   });
   root
     .querySelectorAll(
-      'a[href="/customer-login"], a[href="/admin-login"], a[href="/admin-dashboard"], a[href="/profile"]',
+      'a[href="/customer-login"], a[href="/admin-login"], a[href="/admin-dashboard"], a[href="/profile"]:not(.customer-profile-action)',
     )
     .forEach((link) => {
       link.closest('li')?.remove();
@@ -605,31 +784,30 @@ function getCurrentPage() {
     pageName = 'login';
     window.sessionStorage.removeItem(storefrontPreviewKey);
   }
-  let isPublicStorefront = pageName === 'storefront';
-  if (pageName === 'admin-dashboard' || pageName === 'admin-login') {
+  const isPreviewEntry =
+    pageName === 'storefront' && currentUrl.searchParams.get('preview') === 'admin';
+  let isAdminPreview = false;
+  if (
+    pageName === 'admin-dashboard' ||
+    pageName === 'admin-login' ||
+    pageName === 'admin-profile' ||
+    pageName === 'admin-collections' ||
+    pageName === 'admin-collection' ||
+    pageName === 'admin-products' ||
+    pageName === 'customer-dashboard' ||
+    pageName === 'customer-login' ||
+    pageName === 'customer-catalog' ||
+    pageName === 'profile'
+  ) {
     window.sessionStorage.removeItem(storefrontPreviewKey);
-  } else if (isPublicStorefront) {
+  } else if (isPreviewEntry) {
     window.sessionStorage.setItem(storefrontPreviewKey, 'true');
+    isAdminPreview = true;
   } else {
-    isPublicStorefront =
+    isAdminPreview =
       window.sessionStorage.getItem(storefrontPreviewKey) === 'true';
   }
-  if (
-    isPublicStorefront &&
-    [
-      'admin-dashboard',
-      'admin-profile',
-      'admin-login',
-      'customer-dashboard',
-      'customer-login',
-      'login',
-      'profile',
-    ].includes(pageName)
-  ) {
-    pageName = 'storefront';
-    currentUrl.pathname = '/storefront';
-    window.history.replaceState(null, '', currentUrl);
-  }
+  const isPublicStorefront = pageName === 'storefront' || isAdminPreview;
   const pageKey =
     pageName === 'index' || pageName === 'storefront' ? 'index' : pageName;
   const template =
@@ -675,11 +853,16 @@ function getCurrentPage() {
       navLinks.append(accountLink);
     }
     parsedPage.body
-      .querySelectorAll('.nav-actions a[href="/customer-dashboard"]')
+      .querySelectorAll(
+        '.nav-actions a.customer-account-action, .nav-actions a[href="/customer-dashboard"]',
+      )
       .forEach((link) => {
         link.classList.add('customer-account-action');
-        link.setAttribute('aria-label', 'My account');
-        link.setAttribute('title', 'My account');
+        const label = link.classList.contains('customer-profile-action')
+          ? 'Your profile'
+          : 'My account';
+        link.setAttribute('aria-label', label);
+        link.setAttribute('title', label);
       });
     const navActions = parsedPage.body.querySelector('.site-nav .nav-actions');
     if (navActions && !navActions.querySelector('.customer-account-action')) {
@@ -705,6 +888,7 @@ function getCurrentPage() {
 
   return {
     bodyClass: parsedPage.body.className,
+    isAdminPreview,
     isPublicStorefront,
     markup: parsedPage.body.innerHTML,
     title: parsedPage.title,
@@ -732,33 +916,33 @@ function App() {
     content.className = page.bodyClass || 'app-shell';
     let currentOffer = null;
 
-    if (!page.isPublicStorefront) {
-      try {
-        const profile = readCustomerProfile();
-        updateCustomerDisplay(content, profile);
-        const profileForm = content.querySelector('[data-customer-profile-form]');
-        if (profileForm instanceof HTMLFormElement) {
-          Object.entries(profile).forEach(([key, value]) => {
-            const field = profileForm.elements.namedItem(key);
-            if (field instanceof HTMLInputElement && field.type === 'checkbox') {
-              field.checked = value;
-            } else if (field instanceof HTMLInputElement) {
-              field.value = value;
-            }
-          });
-        }
-      } catch (error) {
-        showToast(
-          `Could not load your profile. ${
-            error instanceof Error ? error.message : 'Please try again.'
-          }`,
-        );
+    try {
+      const profile = readCustomerProfile();
+      updateCustomerDisplay(content, profile);
+      const profileForm = content.querySelector('[data-customer-profile-form]');
+      if (profileForm instanceof HTMLFormElement) {
+        Object.entries(profile).forEach(([key, value]) => {
+          const field = profileForm.elements.namedItem(key);
+          if (field instanceof HTMLInputElement && field.type === 'checkbox') {
+            field.checked = value;
+          } else if (field instanceof HTMLInputElement) {
+            field.value = value;
+          }
+        });
       }
+    } catch (error) {
+      showToast(
+        `Could not load your profile. ${
+          error instanceof Error ? error.message : 'Please try again.'
+        }`,
+      );
     }
 
     if (
       page.bodyClass === 'dash' &&
-      (page.title.startsWith('Studio Dashboard') || page.title.startsWith('Admin Profile'))
+      (page.title.startsWith('Studio Dashboard') ||
+        page.title.startsWith('Admin Profile') ||
+        page.title.includes('Studio Admin'))
     ) {
       try {
         const profile = readAdminProfile();
@@ -787,7 +971,7 @@ function App() {
           content,
           readStoredArray(studioCollectionsKey, 'collections'),
         );
-        addPreviewToolbar(content);
+        if (page.isAdminPreview) addPreviewToolbar(content);
       } catch (error) {
         showToast(
           `Could not load storefront updates. ${
@@ -795,12 +979,35 @@ function App() {
           }`,
         );
       }
-    } else if (page.bodyClass === 'dash' && page.title.startsWith('Studio Dashboard')) {
+    } else if (content.querySelector('.shop-layout')) {
+      try {
+        renderStorefrontProducts(content, readStoredArray(studioProductsKey, 'products'));
+        if (page.title.startsWith('Customer Collection')) {
+          renderCustomerCatalogCollections(
+            content,
+            readStoredArray(studioCollectionsKey, 'collections'),
+          );
+        }
+      } catch (error) {
+        showToast(
+          `Could not load shop products. ${
+            error instanceof Error ? error.message : 'Please try again.'
+          }`,
+        );
+      }
+    } else if (
+      page.bodyClass === 'dash' &&
+      (page.title.startsWith('Studio Dashboard') || page.title.includes('Studio Admin'))
+    ) {
       try {
         renderAdminProducts(content, readStoredArray(studioProductsKey, 'products'));
         renderAdminCollections(
           content,
           readStoredArray(studioCollectionsKey, 'collections'),
+        );
+        renderAdminProductCatalog(
+          content,
+          readStoredArray(studioProductsKey, 'products'),
         );
         currentOffer = readStudioOffer();
         renderAdminOffer(content, currentOffer);
@@ -1093,6 +1300,7 @@ function App() {
           products.push(product);
           window.localStorage.setItem(studioProductsKey, JSON.stringify(products));
           renderAdminProducts(content, products);
+          renderAdminProductCatalog(content, products);
           form.reset();
           form.closest('.modal')?.classList.remove('show');
           showToast('Product published to the customer storefront preview.');
