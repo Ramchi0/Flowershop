@@ -827,6 +827,31 @@ function getCurrentPage() {
       );
     }
   });
+  parsedPage.body
+    .querySelectorAll('.site-nav .nav-actions a[href="/cart"]')
+    .forEach((link) => {
+      link.classList.add('nav-cart-action');
+      link.setAttribute('aria-label', 'Cart');
+      link.setAttribute('title', 'Cart');
+      [...link.childNodes]
+        .filter((node) => node.nodeType === Node.TEXT_NODE)
+        .forEach((node) => node.remove());
+
+      if (!link.querySelector('.nav-cart-icon')) {
+        const icon = document.createElement('span');
+        icon.className = 'nav-cart-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.textContent = '♧';
+        link.prepend(icon);
+      }
+
+      if (!link.querySelector('.nav-cart-label')) {
+        const label = document.createElement('span');
+        label.className = 'nav-cart-label';
+        label.textContent = 'Cart';
+        link.append(label);
+      }
+    });
   parsedPage.body.querySelectorAll('form[data-redirect]').forEach((form) => {
     const redirect = form.getAttribute('data-redirect');
     const match = redirect?.match(/^(?:\.\/)?([a-z0-9-]+)\.html([#?].*)?$/i);
@@ -839,6 +864,11 @@ function getCurrentPage() {
     }
   });
   if (!parsedPage.body.className) {
+    parsedPage.body
+      .querySelectorAll(
+        '.site-nav .nav-links a[href$="#custom"], .site-nav .nav-links a[href$="#journal"]',
+      )
+      .forEach((link) => link.remove());
     parsedPage.body
       .querySelectorAll('.nav-links a[href="/customer-login"]')
       .forEach((link) => {

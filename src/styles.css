@@ -185,6 +185,30 @@
   font-size: .63rem;
 }
 
+.nav-actions .nav-cart-action {
+  display: inline-flex;
+  width: auto;
+  min-width: 39px;
+  height: 39px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nav-cart-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.nav-cart-label {
+  line-height: 1;
+}
+
 .admin-dashboard-actions {
   display: flex;
   flex-wrap: wrap;
